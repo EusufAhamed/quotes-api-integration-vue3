@@ -1,18 +1,98 @@
 <template>
-  <div class="home">
-    <img alt="Vue logo" src="../assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js + TypeScript App"/>
+  <div class="container">
+    <h1><code>Quotes Collection</code></h1>
+    <blockquote v-for="quote in quotes" :key="quote.id">
+      <p>{{quote.quote_category}}</p>
+      <p><q>{{quote.quote}}</q></p>
+      <footer>{{quote.author}}</footer>
+    </blockquote>
   </div>
 </template>
 
-<script lang="ts">
-import { Options, Vue } from 'vue-class-component';
-import HelloWorld from '@/components/HelloWorld.vue'; // @ is an alias to /src
+<script>
+import {ref} from "vue"
+export default{
+  setup(){
+    const quotes = ref([]);
+    const error = ref(null);
 
-@Options({
-  components: {
-    HelloWorld,
-  },
-})
-export default class Home extends Vue {}
+    const loadQuotes = async () => {
+      try{
+        let data = await fetch("http://127.0.0.1:8010/api/v1.0/quotes/get-quotes")
+
+        if(!data.ok){
+          throw Error("internal server error!")
+        }
+
+        quotes.value = await data.json()
+      } 
+      catch(err){
+        error.value = err.message;
+        console.log(error.value);
+      }
+    }
+
+    loadQuotes()
+
+    return {quotes, error}
+  }
+}
 </script>
+
+<style scoped>
+blockquote {
+  margin: 0 auto;
+  padding: 1em;
+  border-left: 5px solid #999;
+}
+blockquote:before {
+  display: none;
+}
+blockquote:not(:first-of-type) {
+  margin-top: 0.5em;
+}
+blockquote p {
+  color: #555;
+  font-size: 12pt;
+  line-height: 1.4;
+  font-family: "PT Serif", Cambria, "Hoefler Text", Utopia, "Liberation Serif",
+    "Nimbus Roman No9 L Regular", Times, "Times New Roman", serif;
+}
+blockquote footer {
+  margin-top: 0.5em;
+  padding: 0;
+  color: #777;
+  font-size: 12pt;
+  text-align: left;
+  font-style: italic;
+}
+blockquote footer:before {
+  content: "— ";
+}
+blockquote:nth-of-type(even) {
+  text-align: right;
+  border-left: none;
+  border-right: 5px solid #999;
+}
+blockquote:nth-of-type(even) footer {
+  text-align: right;
+}
+blockquote:nth-of-type(even) footer:before {
+  content: "";
+}
+blockquote:nth-of-type(even) footer:after {
+  content: " —";
+}
+@element 'blockquote' and (min-width: 300px) {
+  blockquote {
+    padding: 1em 20% 1em 1em;
+  }
+  blockquote p {
+    font-size: 14pt;
+  }
+  blockquote:nth-of-type(even) {
+    padding: 1em 1em 1em 20%;
+  }
+}
+</style>
+

@@ -1,0 +1,10 @@
+version: "3"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: quotes-api-integration-vue3
+    command: bash -c "npm run serve"
+    ports:
+      - 8080:8080
